@@ -3,6 +3,14 @@ var fs = require('fs'),
     jp = jspath.apply, 
     filehound = require('filehound');
 
+function findResourceName(ast) {
+    var stmt = jp('..*{.nodeType=="Stmt_PropertyProperty" && .name == "_resource"}', ast);
+    if(stmt.length === 0) {
+	return;
+    }
+    return stmt[0]['default'].value;
+}
+
 function extract(astPath) {
 	var ast = JSON.parse(fs.readFileSync(astPath, 'utf8'));
 
@@ -12,9 +20,12 @@ function extract(astPath) {
 	    return;
 	}
 
+	var resName = findResourceName(ast);
+
 	var out = {
 		name: classDef[0].name,
-		fields: {}
+		fields: {},
+		resource: resName
 	};
 
 	console.log('Processing class ' + out.name);
